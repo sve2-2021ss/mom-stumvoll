@@ -1,0 +1,3 @@
+package systemValues
+
+interface SystemValue

@@ -1,0 +1,10 @@
+{
+  "host": "localhost",
+  "exchange": "agent",
+  "deviceMatch": "*",
+  "cpuMax": 90,
+  "ramMax": 80,
+  "delicateProcesses": [
+    "/home/nginx"
+  ]
+}
