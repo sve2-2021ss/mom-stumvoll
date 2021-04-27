@@ -10,6 +10,8 @@ namespace Agent.SystemValue.Api.Types
         [ProtoMember(1)] public string Executable { get; }
         public string Type { get; }
 
+        [ProtoMember(2)] public ServiceEventType ServiceEventType { get; set; }
+
         public ServiceEvent()
         {
         }
@@ -17,6 +19,7 @@ namespace Agent.SystemValue.Api.Types
         public ServiceEvent(string executable, ServiceEventType serviceEventType)
         {
             Executable = executable;
+            ServiceEventType = serviceEventType;
             Type = serviceEventType switch
             {
                 ServiceEventType.Start => "events.service.started",
@@ -26,9 +29,10 @@ namespace Agent.SystemValue.Api.Types
         }
     }
 
+    [ProtoContract]
     public enum ServiceEventType
     {
-        Start,
-        Stop
+        [ProtoEnum] Start = 0,
+        [ProtoEnum] Stop = 1
     }
 }

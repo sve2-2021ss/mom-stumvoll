@@ -14,6 +14,6 @@ namespace Agent.SystemValue.Mock.MockSources.Cpu
 
         protected override CpuLoad GenerateValue() => new(RandomValue());
 
-        private byte RandomValue() => (byte) _random.Next(0, 100);
+        private int RandomValue() => _random.Next(0, 100);
     }
 }

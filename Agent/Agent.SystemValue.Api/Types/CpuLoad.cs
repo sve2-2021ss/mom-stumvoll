@@ -6,7 +6,7 @@ namespace Agent.SystemValue.Api.Types
     [ProtoContract]
     public class CpuLoad : ISystemValue
     {
-        [ProtoMember(1)] public byte LoadPercentage { get; }
+        [ProtoMember(1)] public int LoadPercentage { get; }
 
         public string Type => "metrics.cpu.load";
 
@@ -14,7 +14,7 @@ namespace Agent.SystemValue.Api.Types
         {
         }
 
-        public CpuLoad(byte loadPercentage)
+        public CpuLoad(int loadPercentage)
         {
             LoadPercentage = loadPercentage;
         }
