@@ -10,15 +10,17 @@ namespace Agent.SystemValue.Mock.MockSources.Services
 {
     public class ServiceEventSource : SystemValueSource<ServiceEvent>, ISystemValueGenerator<ServiceEvent>
     {
-        private readonly int _sleepTimeout;
+        private readonly int _sleepLower;
+        private readonly int _sleepUpper;
         private readonly Random _random = new();
         private readonly IList<string> _serviceNames;
         private readonly IList<string> _runningServices = new List<string>();
 
-        public ServiceEventSource(int sleepTimeout, IList<string> serviceNames)
+        public ServiceEventSource(int sleepLower, int sleepUpper, IList<string> serviceNames)
         {
             _serviceNames = serviceNames;
-            _sleepTimeout = sleepTimeout;
+            _sleepUpper = sleepUpper;
+            _sleepLower = sleepLower;
         }
 
         private void GenerateEvent()
@@ -58,7 +60,7 @@ namespace Agent.SystemValue.Mock.MockSources.Services
                 while (!token.IsCancellationRequested)
                 {
                     GenerateEvent();
-                    await Task.Delay(_sleepTimeout, token);
+                    await Task.Delay(_random.Next(_sleepLower, _sleepUpper), token);
                 }
             }, token);
     }

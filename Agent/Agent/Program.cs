@@ -58,7 +58,6 @@ namespace Agent.App
             CancellationToken token)
         {
             var channel = connection.CreateModel();
-
             channel.ExchangeDeclare(exchangeName, "topic", true);
 
             var api = new PublishApi(channel, exchangeName);
@@ -71,9 +70,9 @@ namespace Agent.App
                     configuration.GetSection("ram:pollingTimeout").Get<int>(),
                     configuration.GetSection("ram:maxMb").Get<uint>()
                 ),
-
                 new ServiceEventSource(
-                    configuration.GetSection("services:pollingTimeout").Get<int>(),
+                    configuration.GetSection("services:sleepLower").Get<int>(),
+                    configuration.GetSection("services:sleepUpper").Get<int>(),
                     configuration.GetSection("services:serviceNames").Get<IList<string>>()
                 )
             };

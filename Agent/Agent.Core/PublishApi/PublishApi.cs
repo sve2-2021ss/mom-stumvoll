@@ -9,6 +9,7 @@ namespace Agent.Core.PublishApi
     {
         private readonly IModel _model;
         private readonly string _exchangeName;
+        private readonly object _lockObject = new();
 
         public PublishApi(IModel model, string exchangeName)
         {
@@ -22,7 +23,11 @@ namespace Agent.Core.PublishApi
             using var stream = new MemoryStream();
             Serializer.Serialize(stream, payload);
 
-            _model.BasicPublish(_exchangeName, key, body: stream.ToArray());
+            lock (_lockObject)
+            {
+                _model.BasicPublish(_exchangeName, key, body: stream.ToArray());
+            }
+            
         }
 
         public void Dispose() => _model.Dispose();
