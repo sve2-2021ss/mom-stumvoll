@@ -1,0 +1,21 @@
+syntax = "proto3";
+package system_values;
+
+message CpuLoad {
+  int32 load = 1;
+}
+
+message RamUsage {
+  int32 usedMb = 1;
+  int32 totalMb = 2;
+}
+
+message ServiceEvent {
+  string executable = 1;
+  ServiceEventType serviceEventType = 2;
+}
+
+enum ServiceEventType {
+  Start = 0;
+  Stop = 1;
+}
