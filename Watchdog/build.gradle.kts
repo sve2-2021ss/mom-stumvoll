@@ -19,13 +19,16 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.0")
     implementation("com.github.ajalt.mordant:mordant:2.0.0-beta1")
-    implementation(kotlin("stdlib-jdk8"))
-    implementation(kotlin("reflect"))
+    implementation(kotlin("stdlib"))
 }
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
     kotlinOptions.useIR = true
+}
+
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`
 }
 
 application {
