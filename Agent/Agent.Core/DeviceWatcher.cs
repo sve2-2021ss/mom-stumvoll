@@ -4,7 +4,7 @@ using Agent.SystemValue.Api.Types.Base;
 
 namespace Agent.Core
 {
-    public sealed class DeviceWatcher : IObserver<ISystemValue>, IDisposable
+    public sealed class DeviceWatcher : IDisposable
     {
         private readonly IPublishApi _api;
         private readonly string _identifier;
@@ -14,12 +14,8 @@ namespace Agent.Core
             _api = api;
             _identifier = identifier;
         }
-
-        public void OnCompleted()
-        {
-        }
-
-        public void OnError(Exception error)
+        
+        public void OnSystemValue(ISystemValue data)
         {
         }
         

@@ -1,11 +1,11 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Agent.SystemValue.Api.SystemValueSource;
 using Agent.SystemValue.Api.Types.Base;
 
 namespace Agent.SystemValue.Mock.MockSources.Generator
 {
-    public abstract class SystemValueGenerator<T> : SystemValueSource<T>, ISystemValueGenerator<T>
+    public abstract class SystemValueGenerator<T> : ISystemValueGenerator<T>
         where T : ISystemValue, new()
     {
         private readonly int _pollingTimeout;
@@ -20,11 +20,12 @@ namespace Agent.SystemValue.Mock.MockSources.Generator
             {
                 while (!token.IsCancellationRequested)
                 {
-                    Notify(GenerateValue());
+                    NewSystemValue?.Invoke(GenerateValue());
                     await Task.Delay(_pollingTimeout, token);
                 }
             }, token);
 
         protected abstract T GenerateValue();
+        public event Action<T> NewSystemValue;
     }
 }

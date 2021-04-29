@@ -8,7 +8,7 @@ using Agent.SystemValue.Mock.MockSources.Generator;
 
 namespace Agent.SystemValue.Mock.MockSources.Services
 {
-    public class ServiceEventSource : SystemValueSource<ServiceEvent>, ISystemValueGenerator<ServiceEvent>
+    public class ServiceEventSource : ISystemValueSource<ServiceEvent>, ISystemValueGenerator<ServiceEvent>
     {
         private readonly int _sleepLower;
         private readonly int _sleepUpper;
@@ -34,7 +34,7 @@ namespace Agent.SystemValue.Mock.MockSources.Services
                     {
                         var stoppedService = GetRandomElement(_runningServices);
                         _runningServices.Remove(stoppedService);
-                        Notify(new ServiceEvent(stoppedService, ServiceEventType.Start));
+                        NewSystemValue?.Invoke(new ServiceEvent(stoppedService, ServiceEventType.Start));
                     }
 
                     break;
@@ -42,7 +42,7 @@ namespace Agent.SystemValue.Mock.MockSources.Services
                 case < 0.66:
                     var startedService = GetRandomElement(_serviceNames);
                     _runningServices.Add(startedService);
-                    Notify(new ServiceEvent(startedService, ServiceEventType.Stop));
+                    NewSystemValue?.Invoke(new ServiceEvent(startedService, ServiceEventType.Stop));
                     break;
             }
         }
@@ -63,5 +63,7 @@ namespace Agent.SystemValue.Mock.MockSources.Services
                     await Task.Delay(_random.Next(_sleepLower, _sleepUpper), token);
                 }
             }, token);
+
+        public event Action<ServiceEvent> NewSystemValue;
     }
 }

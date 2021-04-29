@@ -3,7 +3,8 @@ using Agent.SystemValue.Api.Types.Base;
 
 namespace Agent.SystemValue.Api.SystemValueSource
 {
-    public interface ISystemValueSource<out T> : IObservable<T> where T : ISystemValue
+    public interface ISystemValueSource<out T> where T : ISystemValue
     {
+        event Action<T> NewSystemValue;
     }
 }

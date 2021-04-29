@@ -80,7 +80,7 @@ namespace Agent.App
 
             foreach (var mockSource in sources)
             {
-                mockSource.Subscribe(deviceWatcher);
+                mockSource.NewSystemValue += deviceWatcher.OnSystemValue;
                 mockSource.Run(token);
             }
 
