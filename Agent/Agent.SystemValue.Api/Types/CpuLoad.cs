@@ -8,8 +8,6 @@ namespace Agent.SystemValue.Api.Types
     {
         [ProtoMember(1)] public int LoadPercentage { get; }
 
-        public string Type => "metrics.cpu.load";
-
         public CpuLoad()
         {
         }

@@ -57,10 +57,7 @@ namespace Agent.App
             IConfiguration configuration,
             CancellationToken token)
         {
-            var channel = connection.CreateModel();
-            channel.ExchangeDeclare(exchangeName, "topic", true);
-
-            var api = new PublishApi(channel, exchangeName);
+            var api = new PublishApi(exchangeName, connection);
             var deviceWatcher = new DeviceWatcher(api, $"device-{index}");
 
             var sources = new List<ISystemValueGenerator<ISystemValue>>

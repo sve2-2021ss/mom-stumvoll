@@ -9,8 +9,6 @@ namespace Agent.SystemValue.Api.Types
         [ProtoMember(1)] public uint UsedMb { get; }
         [ProtoMember(2)] public uint TotalMb { get; }
 
-        public string Type => "metrics.ram.usage";
-
         public RamUsage()
         {
         }

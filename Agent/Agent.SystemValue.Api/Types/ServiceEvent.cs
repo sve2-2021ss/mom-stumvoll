@@ -8,7 +8,6 @@ namespace Agent.SystemValue.Api.Types
     public class ServiceEvent : ISystemValue
     {
         [ProtoMember(1)] public string Executable { get; }
-        public string Type { get; }
 
         [ProtoMember(2)] public ServiceEventType ServiceEventType { get; set; }
 
@@ -20,12 +19,6 @@ namespace Agent.SystemValue.Api.Types
         {
             Executable = executable;
             ServiceEventType = serviceEventType;
-            Type = serviceEventType switch
-            {
-                ServiceEventType.Start => "events.service.started",
-                ServiceEventType.Stop => "events.service.stopped",
-                _ => throw new ArgumentOutOfRangeException(nameof(serviceEventType), serviceEventType, null)
-            };
         }
 
         public override string ToString() => $"ServiceEvent({Executable}, {ServiceEventType})";
