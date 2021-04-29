@@ -21,8 +21,7 @@ fun main() {
     val watchdog = Watchdog(config, ConsoleNotification())
 
     factory.newConnection().use {
-        val channel = it.createChannel()
-        val systemValueApi = SystemValueApi(config, channel)
+        val systemValueApi = SystemValueApi(config, it)
 
         systemValueApi.startConsume(watchdog::onNewValue)
         readLine()

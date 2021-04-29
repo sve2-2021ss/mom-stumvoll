@@ -2,6 +2,7 @@ package api
 
 import Config
 import com.rabbitmq.client.Channel
+import com.rabbitmq.client.Connection
 import com.rabbitmq.client.DeliverCallback
 import com.rabbitmq.client.ShutdownSignalException
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -10,7 +11,14 @@ import kotlinx.serialization.protobuf.ProtoBuf
 import util.eprintln
 
 @ExperimentalSerializationApi
-class SystemValueApi(private val config: Config, private val channel: Channel) {
+class SystemValueApi(config: Config, connection: Connection) {
+    private val channel: Channel = connection.createChannel()
+    private val queue: String = channel.queueDeclare().queue
+
+    init {
+        channel.queueBind(queue, config.exchange, config.routingKey)
+    }
+
     private fun decode(routingKey: String, data: ByteArray): SystemValue? {
         return when {
             routingKey.contains(Regex(""".*\.metrics\.cpu\.load""")) -> {
@@ -29,9 +37,6 @@ class SystemValueApi(private val config: Config, private val channel: Channel) {
     }
 
     fun startConsume(onValue: (String, SystemValue) -> Unit) {
-        val queue = channel.queueDeclare().queue
-        channel.queueBind(queue, config.exchange, config.routingKey)
-
         val deliverCallback = DeliverCallback { _, delivery ->
             try {
                 decode(delivery.envelope.routingKey, delivery.body)?.let {
@@ -43,7 +48,6 @@ class SystemValueApi(private val config: Config, private val channel: Channel) {
         }
 
         channel.basicConsume(queue, true, deliverCallback, this::shutdownCallback)
-        readLine()
     }
 
     private fun shutdownCallback(consumerTag: String, sig: ShutdownSignalException) {
