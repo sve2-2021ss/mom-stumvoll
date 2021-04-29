@@ -42,8 +42,9 @@ class SystemValueApi(config: Config, connection: Connection) {
                 decode(delivery.envelope.routingKey, delivery.body)?.let {
                     onValue(delivery.envelope.routingKey.split(".").first(), it)
                 }
+                channel.basicAck(delivery.envelope.deliveryTag, false)
             } catch (e: Exception) {
-                e.message?.let { eprintln(it) }
+                channel.basicNack(delivery.envelope.deliveryTag, false, false)
             }
         }
 
