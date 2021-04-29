@@ -1,9 +1,9 @@
 {
   "host": "localhost",
   "exchange": "agent",
-  "deviceMatch": "*",
-  "cpuMax": 90,
-  "ramMax": 80,
+  "routingKey": "#",
+  "cpuMax": 10,
+  "ramMax": 10,
   "delicateProcesses": [
     "/home/nginx"
   ]
