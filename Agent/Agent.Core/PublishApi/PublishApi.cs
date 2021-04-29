@@ -17,7 +17,7 @@ namespace Agent.Core.PublishApi
             _exchangeName = exchangeName;
         }
 
-        public void Push(string key, object payload)
+        public void Publish(string key, object payload)
         {
             Console.WriteLine($"Published {payload} to {key}");
             using var stream = new MemoryStream();

@@ -17,11 +17,7 @@ namespace Agent.Core
         
         public void OnSystemValue(ISystemValue data)
         {
-        }
-        
-        public void OnNext(ISystemValue data)
-        {
-            _api.Push($"{_identifier}.{data.Type}", data);
+            _api.Publish($"{_identifier}.{data.Type}", data);
         }
 
         public void Dispose() => _api.Dispose();

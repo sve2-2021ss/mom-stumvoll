@@ -5,6 +5,6 @@ namespace Agent.Core.PublishApi
 {
     public interface IPublishApi : IDisposable
     {
-        void Push(string key, object payload);
+        void Publish(string key, object payload);
     }
 }
