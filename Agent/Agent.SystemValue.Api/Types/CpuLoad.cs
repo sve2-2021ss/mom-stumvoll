@@ -19,9 +19,6 @@ namespace Agent.SystemValue.Api.Types
             LoadPercentage = loadPercentage;
         }
 
-        public override string ToString()
-        {
-            return $"{LoadPercentage}";
-        }
+        public override string ToString() => $"CpuLoad({LoadPercentage})";
     }
 }

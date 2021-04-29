@@ -19,7 +19,7 @@ namespace Agent.Core.PublishApi
 
         public void Push(string key, object payload)
         {
-            Console.WriteLine($"Published to {key}");
+            Console.WriteLine($"Published {payload} to {key}");
             using var stream = new MemoryStream();
             Serializer.Serialize(stream, payload);
 

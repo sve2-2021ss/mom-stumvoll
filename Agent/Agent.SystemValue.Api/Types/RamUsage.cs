@@ -20,5 +20,7 @@ namespace Agent.SystemValue.Api.Types
             UsedMb = usedMb;
             TotalMb = totalMb;
         }
+
+        public override string ToString() => $"RamUsage({UsedMb}/{TotalMb})";
     }
 }

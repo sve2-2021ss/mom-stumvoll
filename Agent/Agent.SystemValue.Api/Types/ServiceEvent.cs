@@ -27,6 +27,8 @@ namespace Agent.SystemValue.Api.Types
                 _ => throw new ArgumentOutOfRangeException(nameof(serviceEventType), serviceEventType, null)
             };
         }
+
+        public override string ToString() => $"ServiceEvent({Executable}, {ServiceEventType})";
     }
 
     [ProtoContract]
