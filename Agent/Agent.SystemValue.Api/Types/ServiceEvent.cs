@@ -1,4 +1,3 @@
-using System;
 using Agent.SystemValue.Api.Types.Base;
 using ProtoBuf;
 

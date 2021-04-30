@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Agent.SystemValue.Api.Types;
 using Agent.SystemValue.Mock.MockSources.Generator;
 
 namespace Agent.SystemValue.Mock.MockSources.Cpu

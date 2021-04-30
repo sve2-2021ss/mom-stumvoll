@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Agent.Core;
-using Agent.Core.PublishApi;
+using Agent.Core.SystemValueApi;
 using Agent.SystemValue.Api.Types.Base;
 using Agent.SystemValue.Mock.MockSources.Cpu;
 using Agent.SystemValue.Mock.MockSources.Generator;
@@ -62,7 +62,7 @@ namespace Agent.App
             IConfiguration configuration,
             CancellationToken token)
         {
-            var api = new PublishApi(exchangeName, connection);
+            var api = new SystemValueApi(exchangeName, connection);
             var deviceWatcher = new DeviceWatcher(api, $"device-{index}");
 
             var sources = new List<ISystemValueGenerator<ISystemValue>>

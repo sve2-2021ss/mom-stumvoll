@@ -6,9 +6,9 @@ using Agent.SystemValue.Api.Types.Base;
 using ProtoBuf;
 using RabbitMQ.Client;
 
-namespace Agent.Core.PublishApi
+namespace Agent.Core.SystemValueApi
 {
-    public sealed class PublishApi : IPublishApi
+    public sealed class SystemValueApi : ISystemValueApi
     {
         private readonly string _exchangeName;
         private readonly IModel _defaultChannel;
@@ -16,7 +16,7 @@ namespace Agent.Core.PublishApi
         private readonly object _lockObject = new();
         private readonly ConcurrentQueue<(ulong tag, string deviceIdentifier, ISystemValue value)> _retryQueue = new();
 
-        public PublishApi(string exchangeName, IConnection connection)
+        public SystemValueApi(string exchangeName, IConnection connection)
         {
             _exchangeName = exchangeName;
             _defaultChannel = connection.CreateModel();

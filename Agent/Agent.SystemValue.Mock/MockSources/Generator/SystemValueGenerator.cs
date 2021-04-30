@@ -6,7 +6,7 @@ using Agent.SystemValue.Api.Types.Base;
 namespace Agent.SystemValue.Mock.MockSources.Generator
 {
     public abstract class SystemValueGenerator<T> : ISystemValueGenerator<T>
-        where T : ISystemValue, new()
+        where T : ISystemValue
     {
         private readonly int _pollingTimeout;
 
