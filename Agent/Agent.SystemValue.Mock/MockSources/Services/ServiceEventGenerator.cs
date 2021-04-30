@@ -8,7 +8,7 @@ using Agent.SystemValue.Mock.MockSources.Generator;
 
 namespace Agent.SystemValue.Mock.MockSources.Services
 {
-    public class ServiceEventSource : ISystemValueSource<ServiceEvent>, ISystemValueGenerator<ServiceEvent>
+    public class ServiceEventGenerator : ISystemValueSource<ServiceEvent>, ISystemValueGenerator<ServiceEvent>
     {
         private readonly int _sleepLower;
         private readonly int _sleepUpper;
@@ -16,7 +16,7 @@ namespace Agent.SystemValue.Mock.MockSources.Services
         private readonly IList<string> _serviceNames;
         private readonly IList<string> _runningServices = new List<string>();
 
-        public ServiceEventSource(int sleepLower, int sleepUpper, IList<string> serviceNames)
+        public ServiceEventGenerator(int sleepLower, int sleepUpper, IList<string> serviceNames)
         {
             _serviceNames = serviceNames;
             _sleepUpper = sleepUpper;

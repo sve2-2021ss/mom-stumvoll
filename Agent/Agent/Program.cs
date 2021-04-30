@@ -34,20 +34,25 @@ namespace Agent.App
             }
 
             var factory = new ConnectionFactory {HostName = host};
-            using var connection = factory.CreateConnection();
             var cts = new CancellationTokenSource();
 
-            IList<DeviceWatcher> deviceWatchers = new List<DeviceWatcher>();
+            IList<(DeviceWatcher, IConnection)> deviceWatchers = new List<(DeviceWatcher, IConnection)>();
 
             for (var i = 0; i < config.GetSection("devices").Get<int>(); i++)
             {
-                deviceWatchers.Add(InitializeDevice(
-                    i, connection, exchangeName, config.GetSection("dataSourceConfig"), cts.Token));
+                var connection = factory.CreateConnection();
+                var deviceWatcher = InitializeDevice(
+                    i, connection, exchangeName, config.GetSection("dataSourceConfig"), cts.Token);
+                deviceWatchers.Add((deviceWatcher, connection));
             }
 
             Console.ReadKey();
             cts.Cancel();
-            foreach (var deviceWatcher in deviceWatchers) deviceWatcher.Dispose();
+            foreach (var (deviceWatcher, connection) in deviceWatchers)
+            {
+                deviceWatcher.Dispose();
+                connection.Dispose();
+            }
         }
 
         private static DeviceWatcher InitializeDevice(
@@ -62,12 +67,21 @@ namespace Agent.App
 
             var sources = new List<ISystemValueGenerator<ISystemValue>>
             {
-                new CpuValueSource(configuration.GetSection("cpu:pollingTimeout").Get<int>()),
-                new RamValueSource(
-                    configuration.GetSection("ram:pollingTimeout").Get<int>(),
-                    configuration.GetSection("ram:maxMb").Get<uint>()
+                new CpuValueGenerator(
+                    configuration.GetSection("cpu:pollingTimeout").Get<int>(),
+                    configuration.GetSection("cpu:coreCount").Get<int>(),
+                    (configuration.GetSection("cpu:temps:lower").Get<int>(),
+                        configuration.GetSection("cpu:temps:upper").Get<int>()),
+                    (configuration.GetSection("cpu:powerDraw:lower").Get<int>(),
+                        configuration.GetSection("cpu:powerDraw:upper").Get<int>())
                 ),
-                new ServiceEventSource(
+                new RamValueGenerator(
+                    configuration.GetSection("ram:pollingTimeout").Get<int>(),
+                    configuration.GetSection("ram:maxMb").Get<uint>(),
+                    (configuration.GetSection("ram:clock:lower").Get<int>(),
+                        configuration.GetSection("ram:clock:upper").Get<int>())
+                ),
+                new ServiceEventGenerator(
                     configuration.GetSection("services:sleepLower").Get<int>(),
                     configuration.GetSection("services:sleepUpper").Get<int>(),
                     configuration.GetSection("services:serviceNames").Get<IList<string>>()

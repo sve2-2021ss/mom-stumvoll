@@ -4,19 +4,21 @@ using ProtoBuf;
 namespace Agent.SystemValue.Api.Types
 {
     [ProtoContract]
-    public class RamUsage : ISystemValue
+    public class Ram : ISystemValue
     {
         [ProtoMember(1)] public uint UsedMb { get; }
         [ProtoMember(2)] public uint TotalMb { get; }
+        [ProtoMember(3)] public int MemoryClock { get; }
 
-        public RamUsage()
+        public Ram()
         {
         }
 
-        public RamUsage(uint usedMb, uint totalMb)
+        public Ram(uint usedMb, uint totalMb, int memoryClock)
         {
             UsedMb = usedMb;
             TotalMb = totalMb;
+            MemoryClock = memoryClock;
         }
 
         public override string ToString() => $"RamUsage({UsedMb}/{TotalMb})";

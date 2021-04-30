@@ -46,8 +46,8 @@ namespace Agent.Core.PublishApi
         private static string GetKeyForType(ISystemValue systemValue) =>
             systemValue switch
             {
-                CpuLoad => "metrics.cpu.load",
-                RamUsage => "metrics.ram.usage",
+                Cpu => "metrics.cpu",
+                Ram => "metrics.ram",
                 ServiceEvent serviceEvent => GetKeyForServiceEvent(serviceEvent),
                 _ => throw new ArgumentOutOfRangeException(nameof(systemValue))
             };
