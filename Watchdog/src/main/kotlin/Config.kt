@@ -10,7 +10,7 @@ data class Config(
     val routingKey: String,
     val cpuConfig: CpuConfig,
     val ramConfig: RamConfig,
-    val delicateProcesses: List<String>
+    val serviceEventConfig: ServiceEventConfig
 ) {
     companion object {
         fun fromFile(fileName: String): Config? =
@@ -26,3 +26,6 @@ data class CpuConfig(val maxTmp: Int, val maxPower: Int, val maxLoad: Int)
 
 @Serializable
 data class RamConfig(val maxLoad: Int, val maxClock: Int)
+
+@Serializable
+data class ServiceEventConfig(val criticalProcesses: List<String>)

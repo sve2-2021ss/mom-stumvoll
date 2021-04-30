@@ -11,7 +11,9 @@
     "maxLoad": 80,
     "maxClock": 1350
   },
-  "delicateProcesses": [
-    "/home/nginx"
-  ]
+  "serviceEventConfig": {
+    "criticalProcesses": [
+      "/home/nginx"
+    ]
+  }
 }

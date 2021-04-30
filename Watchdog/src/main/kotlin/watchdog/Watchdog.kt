@@ -55,7 +55,7 @@ class Watchdog(private val config: Config, private val notificationStrategy: Not
 
     private fun checkServiceEvent(serviceEvent: ServiceEvent): List<String> =
         if (serviceEvent.serviceEventType == ServiceEventType.Stop
-            && config.delicateProcesses.contains(serviceEvent.executable)
+            && config.serviceEventConfig.criticalProcesses.contains(serviceEvent.executable)
         ) {
             listOf("Critical service ${serviceEvent.executable} was stopped")
         } else listOf()
