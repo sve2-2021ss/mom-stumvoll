@@ -42,6 +42,8 @@ class SystemValueApi(config: Config, connection: Connection) {
             }
         }
 
-        channel.basicConsume(queue, true, deliverCallback, this::shutdownCallback)
+        channel.basicConsume(queue, false, deliverCallback) { _, sig ->
+            eprintln("Shutdown: ${sig.message}")
+        }
     }
 }
