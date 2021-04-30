@@ -2,8 +2,15 @@
   "host": "localhost",
   "exchange": "agent",
   "routingKey": "#",
-  "cpuMax": 10,
-  "ramMax": 10,
+  "cpuConfig": {
+    "maxTmp": 80,
+    "maxPower": 40,
+    "maxLoad": 80
+  },
+  "ramConfig": {
+    "maxLoad": 80,
+    "maxClock": 1350
+  },
   "delicateProcesses": [
     "/home/nginx"
   ]

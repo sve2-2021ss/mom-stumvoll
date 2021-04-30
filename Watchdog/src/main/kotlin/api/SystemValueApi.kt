@@ -4,7 +4,6 @@ import Config
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.DeliverCallback
-import com.rabbitmq.client.ShutdownSignalException
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
@@ -19,20 +18,15 @@ class SystemValueApi(config: Config, connection: Connection) {
         channel.queueBind(queue, config.exchange, config.routingKey)
     }
 
+    private inline fun <reified T> ByteArray.decodeProto(): T =
+        ProtoBuf.decodeFromByteArray(this)
+
     private fun decode(routingKey: String, data: ByteArray): SystemValue? {
         return when {
-            routingKey.contains(Regex(""".*\.metrics\.cpu\.load""")) -> {
-                ProtoBuf.decodeFromByteArray<CpuLoad>(data)
-            }
-            routingKey.contains(Regex(""".*\.metrics\.ram\.usage""")) -> {
-                ProtoBuf.decodeFromByteArray<RamUsage>(data)
-            }
-            routingKey.contains(Regex(""".*\.events.service.(started|stopped)""")) -> {
-                ProtoBuf.decodeFromByteArray<ServiceEvent>(data)
-            }
-            else -> {
-                null
-            }
+            routingKey.contains(Regex(""".*\.metrics\.cpu""")) -> data.decodeProto<Cpu>()
+            routingKey.contains(Regex(""".*\.metrics\.ram""")) -> data.decodeProto<Ram>()
+            routingKey.contains(Regex(""".*\.events.service.(started|stopped)""")) -> data.decodeProto<ServiceEvent>()
+            else -> null
         }
     }
 
@@ -49,9 +43,5 @@ class SystemValueApi(config: Config, connection: Connection) {
         }
 
         channel.basicConsume(queue, true, deliverCallback, this::shutdownCallback)
-    }
-
-    private fun shutdownCallback(consumerTag: String, sig: ShutdownSignalException) {
-        eprintln("Shutdown: ${sig.message}")
     }
 }

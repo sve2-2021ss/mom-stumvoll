@@ -8,13 +8,18 @@ sealed class SystemValue
 
 @ExperimentalSerializationApi
 @Serializable
-data class CpuLoad(@ProtoNumber(1) val loadPercentage: Int = 0) : SystemValue()
+data class Cpu(
+    @ProtoNumber(1) val loadPercentage: Int = 0,
+    @ProtoNumber(2) val powerDraw: Int = 0,
+    @ProtoNumber(3) val coreTemps: List<Int>
+) : SystemValue()
 
 @ExperimentalSerializationApi
 @Serializable
-data class RamUsage(
+data class Ram(
     @ProtoNumber(1) val usedMb: Int = 0,
-    @ProtoNumber(2) val totalMb: Int = 0
+    @ProtoNumber(2) val totalMb: Int = 0,
+    @ProtoNumber(3) val memoryClock: Int = 0
 ) : SystemValue()
 
 
@@ -29,9 +34,9 @@ data class ServiceEvent(
 @Serializable
 @ExperimentalSerializationApi
 enum class ServiceEventType {
-    @ProtoNumber(0)
+    @ProtoNumber(1)
     Start,
 
-    @ProtoNumber(1)
+    @ProtoNumber(2)
     Stop
 }

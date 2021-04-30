@@ -8,8 +8,8 @@ data class Config(
     val host: String,
     val exchange: String,
     val routingKey: String,
-    val cpuMax: Int,
-    val ramMax: Int,
+    val cpuConfig: CpuConfig,
+    val ramConfig: RamConfig,
     val delicateProcesses: List<String>
 ) {
     companion object {
@@ -19,3 +19,10 @@ data class Config(
                 ?.tryNull { Json.decodeFromString<Config>(it) }
     }
 }
+
+
+@Serializable
+data class CpuConfig(val maxTmp: Int, val maxPower: Int, val maxLoad: Int)
+
+@Serializable
+data class RamConfig(val maxLoad: Int, val maxClock: Int)

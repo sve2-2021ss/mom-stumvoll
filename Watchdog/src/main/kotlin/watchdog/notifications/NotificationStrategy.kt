@@ -1,5 +1,5 @@
 package watchdog.notifications
 
 interface NotificationStrategy {
-    fun notify(device: String, message: String)
+    fun notify(device: String, messages: List<String>)
 }

@@ -8,33 +8,56 @@ import watchdog.notifications.NotificationStrategy
 @ExperimentalSerializationApi
 class Watchdog(private val config: Config, private val notificationStrategy: NotificationStrategy) {
     fun onNewValue(deviceName: String, systemValue: SystemValue) {
-        when (systemValue) {
-            is CpuLoad ->
-                if (checkCpuLoad(systemValue)) notificationStrategy.notify(deviceName, cpuLoadMessage(systemValue))
-            is RamUsage ->
-                if (checkRamUsage(systemValue)) notificationStrategy.notify(deviceName, ramUsageMessage(systemValue))
-            is ServiceEvent ->
-                if (checkServiceEvent(systemValue)) notificationStrategy.notify(
-                    deviceName,
-                    serviceEventMessage(systemValue)
-                )
+        val errorList = when (systemValue) {
+            is Cpu -> checkCpu(systemValue)
+            is Ram -> checkRam(systemValue)
+            is ServiceEvent -> checkServiceEvent(systemValue)
+        }
+
+        if (errorList.isNotEmpty()) {
+            notificationStrategy.notify(deviceName, errorList)
         }
     }
 
-    private fun checkCpuLoad(cpuLoad: CpuLoad): Boolean = cpuLoad.loadPercentage > config.cpuMax
+    private fun checkCpu(cpu: Cpu): List<String> {
+        val errorList = mutableListOf<String>()
+        cpu.coreTemps.average().let {
+            if (it > config.cpuConfig.maxTmp) {
+                errorList.add("Cpu temperature $it above threshold ${config.cpuConfig.maxTmp}")
+            }
+        }
 
-    private fun checkRamUsage(ramUsage: RamUsage) = 100 * ramUsage.usedMb / ramUsage.totalMb > config.ramMax
+        if (cpu.loadPercentage > config.cpuConfig.maxLoad) {
+            errorList.add("Cpu load ${cpu.loadPercentage} above threshold ${config.cpuConfig.maxLoad}")
+        }
 
-    private fun checkServiceEvent(serviceEvent: ServiceEvent) =
-        serviceEvent.serviceEventType == ServiceEventType.Stop
-                && config.delicateProcesses.contains(serviceEvent.executable)
+        if (cpu.powerDraw > config.cpuConfig.maxPower) {
+            errorList.add("Cpu power draw ${cpu.powerDraw} above threshold ${config.cpuConfig.maxPower}")
+        }
 
-    private fun cpuLoadMessage(cpuLoad: CpuLoad) =
-        "Cpu load was ${cpuLoad.loadPercentage}% (Threshold is ${config.cpuMax}%)"
+        return errorList
+    }
 
-    private fun ramUsageMessage(ramUsage: RamUsage) =
-        "Ram usage was ${ramUsage.usedMb} out of ${ramUsage.totalMb} (Threshold is ${config.ramMax}%)"
+    private fun checkRam(ram: Ram): List<String> {
+        val errorList = mutableListOf<String>()
+        (100 * ram.usedMb / ram.totalMb).let {
+            if (it > config.ramConfig.maxLoad) {
+                errorList.add("Ram load $it above threshold ${config.ramConfig.maxLoad}")
+            }
+        }
 
-    private fun serviceEventMessage(serviceEvent: ServiceEvent) =
-        "Critical service ${serviceEvent.executable} was stopped"
+        if (ram.memoryClock > config.ramConfig.maxClock) {
+            errorList.add("Ram clock ${ram.memoryClock} above threshold ${config.ramConfig.maxClock}")
+        }
+
+        return errorList
+    }
+
+    private fun checkServiceEvent(serviceEvent: ServiceEvent): List<String> =
+        if (serviceEvent.serviceEventType == ServiceEventType.Stop
+            && config.delicateProcesses.contains(serviceEvent.executable)
+        ) {
+            listOf("Critical service ${serviceEvent.executable} was stopped")
+        } else listOf()
+
 }
