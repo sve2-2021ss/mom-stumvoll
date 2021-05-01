@@ -7,7 +7,7 @@ import util.tryNull
 data class Config(
     val host: String,
     val exchange: String,
-    val routingKey: String,
+    val routingKeys: List<String>,
     val cpuConfig: CpuConfig,
     val ramConfig: RamConfig,
     val serviceEventConfig: ServiceEventConfig

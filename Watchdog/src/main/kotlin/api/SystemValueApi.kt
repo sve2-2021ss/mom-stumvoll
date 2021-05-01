@@ -15,7 +15,10 @@ class SystemValueApi(config: Config, connection: Connection) {
     private val queue: String = channel.queueDeclare().queue
 
     init {
-        channel.queueBind(queue, config.exchange, config.routingKey)
+        config.routingKeys.forEach {
+            channel.queueBind(queue, config.exchange, it)
+        }
+
     }
 
     private inline fun <reified T> ByteArray.decodeProto(): T =

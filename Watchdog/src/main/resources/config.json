@@ -1,7 +1,10 @@
 {
   "host": "localhost",
   "exchange": "agent",
-  "routingKey": "#",
+  "routingKeys": [
+    "*.metrics.cpu",
+    "*.events.#"
+  ],
   "cpuConfig": {
     "maxTmp": 80,
     "maxPower": 40,
