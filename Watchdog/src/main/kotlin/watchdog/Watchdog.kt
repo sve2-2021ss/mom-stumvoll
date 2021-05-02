@@ -7,7 +7,7 @@ import watchdog.notifications.NotificationStrategy
 
 @ExperimentalSerializationApi
 class Watchdog(private val config: Config, private val notificationStrategy: NotificationStrategy) {
-    fun onNewValue(deviceName: String, systemValue: SystemValue) {
+    fun onNewValue(systemValue: SystemValue) {
         val errorList = when (systemValue) {
             is Cpu -> checkCpu(systemValue)
             is Ram -> checkRam(systemValue)
@@ -15,7 +15,7 @@ class Watchdog(private val config: Config, private val notificationStrategy: Not
         }
 
         if (errorList.isNotEmpty()) {
-            notificationStrategy.notify(deviceName, errorList)
+            notificationStrategy.notify(systemValue.deviceId, errorList)
         }
     }
 

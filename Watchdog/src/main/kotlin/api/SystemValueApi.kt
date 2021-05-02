@@ -33,11 +33,11 @@ class SystemValueApi(config: Config, connection: Connection) {
         }
     }
 
-    fun startConsume(onValue: (String, SystemValue) -> Unit) {
+    fun startConsume(onValue: (SystemValue) -> Unit) {
         val deliverCallback = DeliverCallback { _, delivery ->
             try {
                 decode(delivery.envelope.routingKey, delivery.body)?.let {
-                    onValue(delivery.envelope.routingKey.split(".").first(), it)
+                    onValue(it)
                 }
                 channel.basicAck(delivery.envelope.deliveryTag, false)
             } catch (e: Exception) {
