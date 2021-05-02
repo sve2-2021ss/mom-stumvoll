@@ -4,11 +4,13 @@ using ProtoBuf;
 namespace Agent.SystemValue.Api.Types
 {
     [ProtoContract]
-    public class ServiceEvent : ISystemValue
+    public class ServiceEvent : ISystemValue, IEvent
     {
         [ProtoMember(1)] public string Executable { get; }
 
         [ProtoMember(2)] public ServiceEventType ServiceEventType { get; }
+
+        [ProtoMember(10)] public string DeviceIdentifier { get; set; }
 
         public ServiceEvent()
         {

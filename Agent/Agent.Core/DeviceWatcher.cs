@@ -18,8 +18,9 @@ namespace Agent.Core
 
         public void OnSystemValue(ISystemValue data)
         {
+            data.DeviceIdentifier = _deviceIdentifier;
             Console.WriteLine($"{_deviceIdentifier} -- {data}");
-            _api.Publish(_deviceIdentifier, data, data is ServiceEvent);
+            _api.Publish(_deviceIdentifier, data, data is IEvent);
         }
 
         public void Dispose() => _api.Dispose();
