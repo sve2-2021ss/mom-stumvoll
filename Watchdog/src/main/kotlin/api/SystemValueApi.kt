@@ -12,11 +12,11 @@ import util.eprintln
 @ExperimentalSerializationApi
 class SystemValueApi(config: Config, connection: Connection) {
     private val channel: Channel = connection.createChannel()
-    private val queue: String = channel.queueDeclare().queue
+    private val queueName: String = channel.queueDeclare().queue
 
     init {
         config.routingKeys.forEach {
-            channel.queueBind(queue, config.exchange, it)
+            channel.queueBind(queueName, config.exchange, it)
         }
 
     }
@@ -45,7 +45,7 @@ class SystemValueApi(config: Config, connection: Connection) {
             }
         }
 
-        channel.basicConsume(queue, false, deliverCallback) { _, sig ->
+        channel.basicConsume(queueName, false, deliverCallback) { _, sig ->
             eprintln("Shutdown: ${sig.message}")
         }
     }
