@@ -5,6 +5,6 @@ namespace Agent.Core.SystemValueApi
 {
     public interface ISystemValueApi : IDisposable
     {
-        void Publish(string deviceIdentifier, ISystemValue payload, bool confirm = false);
+        void Publish(ISystemValue payload, bool confirm = false);
     }
 }

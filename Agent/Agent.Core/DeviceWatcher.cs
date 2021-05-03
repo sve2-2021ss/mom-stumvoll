@@ -1,6 +1,5 @@
 using System;
 using Agent.Core.SystemValueApi;
-using Agent.SystemValue.Api.Types;
 using Agent.SystemValue.Api.Types.Base;
 
 namespace Agent.Core
@@ -20,7 +19,7 @@ namespace Agent.Core
         {
             data.DeviceIdentifier = _deviceIdentifier;
             Console.WriteLine($"{_deviceIdentifier} -- {data}");
-            _api.Publish(_deviceIdentifier, data, data is IEvent);
+            _api.Publish(data, data is IEvent);
         }
 
         public void Dispose() => _api.Dispose();

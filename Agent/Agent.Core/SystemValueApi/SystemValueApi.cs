@@ -14,7 +14,7 @@ namespace Agent.Core.SystemValueApi
         private readonly IModel _defaultChannel;
         private readonly IModel _confirmChannel;
         private readonly object _lockObject = new();
-        private readonly ConcurrentQueue<(ulong tag, string deviceIdentifier, ISystemValue value)> _retryQueue = new();
+        private readonly ConcurrentDictionary<ulong, ISystemValue> _ackMap = new();
 
         public SystemValueApi(string exchangeName, IConnection connection)
         {
@@ -25,21 +25,22 @@ namespace Agent.Core.SystemValueApi
             _confirmChannel = connection.CreateModel();
             _confirmChannel.ExchangeDeclare(exchangeName, "topic", true);
             _confirmChannel.ConfirmSelect();
-            _confirmChannel.BasicAcks += (_, args) => { HandleServerAck(args.DeliveryTag, args.Multiple, false); };
-            _confirmChannel.BasicNacks += (_, args) => { HandleServerAck(args.DeliveryTag, args.Multiple, true); };
+            _confirmChannel.BasicAcks += (_, args) => HandleConfirmation(args.DeliveryTag, args.Multiple, false);
+            _confirmChannel.BasicNacks += (_, args) => HandleConfirmation(args.DeliveryTag, args.Multiple, true);
         }
 
-        private void HandleServerAck(ulong tag, bool multiple, bool shouldResend)
+        private void HandleConfirmation(ulong tag, bool multiple, bool nack)
         {
-            bool TagComparer(ulong queueTag) =>
-                multiple ? queueTag >= tag : queueTag == tag;
-
-            while (_retryQueue.TryPeek(out var result) && TagComparer(result.tag))
+            var resume = true;
+            while (resume && _ackMap.ContainsKey(tag) && _ackMap.TryRemove(tag, out var stored))
             {
-                if (_retryQueue.TryDequeue(out var resendValue) && shouldResend)
+                if (nack)
                 {
-                    Publish(resendValue.deviceIdentifier, resendValue.value, true);
+                    Publish(stored, true);
                 }
+
+                resume = multiple;
+                tag--;
             }
         }
 
@@ -60,23 +61,23 @@ namespace Agent.Core.SystemValueApi
                 _ => throw new ArgumentOutOfRangeException(nameof(serviceEvent))
             };
 
-        public void Publish(string deviceIdentifier, ISystemValue payload, bool confirm)
+        public void Publish(ISystemValue payload, bool confirm)
         {
             using var stream = new MemoryStream();
             Serializer.Serialize(stream, payload);
-            var routingKey = $"{deviceIdentifier}.{GetKeyForType(payload)}";
+            var routingKey = $"{payload.DeviceIdentifier}.{GetKeyForType(payload)}";
 
             lock (_lockObject)
             {
+                var publishChannel = _defaultChannel;
+
                 if (confirm)
                 {
-                    _retryQueue.Enqueue((_confirmChannel.NextPublishSeqNo, deviceIdentifier, payload));
-                    _confirmChannel.BasicPublish(_exchangeName, routingKey, body: stream.ToArray());
+                    _ackMap.TryAdd(_confirmChannel.NextPublishSeqNo, payload);
+                    publishChannel = _confirmChannel;
                 }
-                else
-                {
-                    _defaultChannel.BasicPublish(_exchangeName, routingKey, body: stream.ToArray());
-                }
+
+                publishChannel.BasicPublish(_exchangeName, routingKey, body: stream.ToArray());
             }
         }
 
