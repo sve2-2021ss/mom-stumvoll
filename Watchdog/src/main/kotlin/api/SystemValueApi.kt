@@ -24,13 +24,11 @@ class SystemValueApi(config: Config, connection: Connection) {
     private inline fun <reified T> ByteArray.decodeProto(): T =
         ProtoBuf.decodeFromByteArray(this)
 
-    private fun decode(routingKey: String, data: ByteArray): SystemValue? {
-        return when {
-            routingKey.contains(Regex(""".*\.metrics\.cpu""")) -> data.decodeProto<Cpu>()
-            routingKey.contains(Regex(""".*\.metrics\.ram""")) -> data.decodeProto<Ram>()
-            routingKey.contains(Regex(""".*\.events.service.(started|stopped)""")) -> data.decodeProto<ServiceEvent>()
-            else -> null
-        }
+    private fun decode(routingKey: String, data: ByteArray): SystemValue? = when {
+        routingKey.contains(Regex(""".*\.metrics\.cpu""")) -> data.decodeProto<Cpu>()
+        routingKey.contains(Regex(""".*\.metrics\.ram""")) -> data.decodeProto<Ram>()
+        routingKey.contains(Regex(""".*\.events.service.(started|stopped)""")) -> data.decodeProto<ServiceEvent>()
+        else -> null
     }
 
     fun startConsume(onValue: (SystemValue) -> Unit) {
@@ -40,8 +38,10 @@ class SystemValueApi(config: Config, connection: Connection) {
                     onValue(it)
                 }
                 channel.basicAck(delivery.envelope.deliveryTag, false)
-            } catch (e: Exception) {
+            } catch (_: MessageProcessingException) {
                 channel.basicNack(delivery.envelope.deliveryTag, false, false)
+            } catch (_: Exception) {
+                channel.basicNack(delivery.envelope.deliveryTag, false, true)
             }
         }
 
