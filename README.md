@@ -93,9 +93,9 @@ The following sections describe the aspects of the communication with the broker
 
 ##### Topic Routing
 
-The communication from the producer to the broker is realized through a topic exchange . This allows the consumer to decide which types messages he wants to receive.
+The communication from the producer to the broker is realized through a topic exchange. This allows the consumer to decide which types of messages he wants to receive.
 
-The following image visualizes the concrete routing keys to which the `Agent` publishes his messages. A message is either a `event` or a `metric`. A drawback to this is, that it difficult for a message to represent multiple types at once.
+The following image visualizes the concrete routing keys to which the `Agent` publishes his messages. A message is either an `event` or a `metric`. A drawback of this is, that it is difficult for a message to represent multiple types at once.
 
 ![RoutingKeys](doc/routing-keys.png)
 
@@ -122,7 +122,7 @@ serviceEvent.ServiceEventType switch
 
 ##### Confirmation
 
-As already mentioned the communication with the broker is abstracted through the `SystemValueApi`. This class provides a single `Publish` method which can be used to send a message to the broker. When calling this method the caller can also define if the message should be acknowledged or not. This is necessary since messages like service events might only occur once and it is critical that the broker receives and handles those messages.
+As already mentioned the communication with the broker is abstracted by the `SystemValueApi`. This class provides a single `Publish` method which can be used to send a message to the broker. When calling this method the caller can also define if the message should be acknowledged or not. This is necessary since messages like service events might only occur once and it is critical that the broker receives and handles those messages.
 
 How the RabbitMQ confirmation process works in general and how it is implemented in the `Agent` is described in the following two sections.
 
