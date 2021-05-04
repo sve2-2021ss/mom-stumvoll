@@ -3,7 +3,7 @@ import com.rabbitmq.client.ConnectionFactory
 import kotlinx.serialization.ExperimentalSerializationApi
 import util.eprintln
 import watchdog.Watchdog
-import watchdog.notifications.ConsoleNotification
+import watchdog.notifications.ConsoleNotificationStrategy
 
 @ExperimentalSerializationApi
 fun main() {
@@ -18,7 +18,7 @@ fun main() {
         host = config.host
     }
 
-    val watchdog = Watchdog(config, ConsoleNotification())
+    val watchdog = Watchdog(config, ConsoleNotificationStrategy())
 
     factory.newConnection().use {
         val systemValueApi = SystemValueApi(config, it)
