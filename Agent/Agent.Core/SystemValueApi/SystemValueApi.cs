@@ -77,7 +77,10 @@ namespace Agent.Core.SystemValueApi
                     publishChannel = _confirmChannel;
                 }
 
-                publishChannel.BasicPublish(_exchangeName, routingKey, body: stream.ToArray());
+                var props = publishChannel.CreateBasicProperties();
+                props.ContentType = "application/protobuf";
+
+                publishChannel.BasicPublish(_exchangeName, routingKey, props, stream.ToArray());
             }
         }
 
