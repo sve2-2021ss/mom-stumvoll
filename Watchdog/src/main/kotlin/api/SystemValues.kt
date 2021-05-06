@@ -12,7 +12,7 @@ sealed class SystemValue {
 
 @ExperimentalSerializationApi
 @Serializable
-class Cpu(
+data class Cpu(
     @ProtoNumber(1) val loadPercentage: Int = 0,
     @ProtoNumber(2) val powerDraw: Int = 0,
     @ProtoNumber(3) val coreTemps: List<Int>,
