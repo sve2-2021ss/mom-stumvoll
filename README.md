@@ -42,7 +42,7 @@ services:
 
 ### Agent
 
-As already outlined in [Use Case](#use-case) the `Agent's` job is it to gather monitoring information of a device and send them to the broker. This application was implemented in C# and uses the `RabbitMQ.Client` library to communicate with the broker. The `protobuf-net` library is used to transform objects to the `protobuf` format.
+As already outlined in [Use Case](#use-case) the `Agent's` job is it to gather monitoring information of a device and send them to the broker. This application was implemented in C# and uses the `RabbitMQ.Client` library to communicate with the broker.
 
 The following sections describe how the `Agent` is structured and how he communicates with the broker.
 
@@ -87,6 +87,42 @@ The `DeviceWatcher` is the bridge between the `SystemValueSources` and the `Syst
 
 The `SystemValueApi` abstracts the RabbitMQ library from the rest of the application. It provides a single `Publish` method which can be used by the application to publish `SystemValues` to the broker. The communication with the broker is described in detail in the next section.
 
+#### Protobuf Usage
+
+The `Agent` uses the `protobuf-net` library to transform objects into the `protobuf` format. It makes it possible to define a `protobuf` contract using `Attributes`, rather than having to generate code from `.proto` files. How such a `protobuf` contract is defined can be seen below.
+
+In addition to that the `protobuf-net.BuildTools` library was used, which helps catch errors in `proto` definitions (e.g. multiple members with the same tag) at compile time.
+
+```CSharp
+[ProtoContract]
+public class Cpu : IMetric
+{
+    [ProtoMember(1)] public int LoadPercentage { get; }
+    [ProtoMember(2)] public int PowerDraw { get; }
+    [ProtoMember(3)] public IList<int> CoreTemps { get; }
+    [ProtoMember(10)] public string DeviceIdentifier { get; set; }
+
+    public Cpu()
+    {
+    }
+
+    public Cpu(int loadPercentage, int powerDraw, IList<int> coreTemps)
+    {
+        LoadPercentage = loadPercentage;
+        PowerDraw = powerDraw;
+        CoreTemps = coreTemps;
+    }
+}
+```
+
+How a `SystemValue` gets transformed to the `protobuf` can be seen below.
+
+```CSharp
+using var stream = new MemoryStream();
+Serializer.Serialize(stream, payload);
+var binary = stream.ToArray();
+```
+
 #### Broker Communication
 
 The following sections describe the aspects of the communication with the broker.
@@ -101,7 +137,7 @@ The following image visualizes the concrete routing keys to which the `Agent` pu
 
 Another downside to this is, that `SystemValues` need to be explicitly mapped to the corresponding routing key as seen in the snippet below. This could lead to a lot of code if more `SystemValues` get introduced.
 
-```C#
+```CSharp
 private static string GetKeyForType(ISystemValue systemValue) =>
 systemValue switch
 {
@@ -165,7 +201,7 @@ _ackMap.TryAdd(_confirmChannel.NextPublishSeqNo, payload);
 
 ### Watchdog
 
-As described in [Use Case](#use-case) the `Watchdogs` purpose is to consume `SystemValues` and notify the user if certain conditions are met. For example if a value is above a certain threshold. This application is implemented using Kotlin and it uses the `kotlinx-serialization-protobuf` library to decode the `protobuf` messages. Since there is no dedicated Kotlin RabbitMQ library it uses the Java `amqp-client` library.
+As described in [Use Case](#use-case) the `Watchdogs` purpose is to consume `SystemValues` and notify the user if certain conditions are met. For example if a value is above a certain threshold. This application is implemented using Kotlin. Since there is no dedicated Kotlin RabbitMQ library it uses the Java `amqp-client` library.
 
 How the `Watchdog` is structured and how he communicates with the broker will be described below.
 
@@ -178,6 +214,26 @@ As already seen in the image in [Application](#application) consists the `Watchd
 - `NotificationStrategy`
 
 Same as on the producer side is the `SystemValueApi` an abstraction of the RabbitMQ library. The `Watchdog` is subscribed to the `SystemValueApi` to receive new `SystemValues`. He checks those values against a user defined configuration. If certain conditions are met (e.g. CPU load is above a certain threshold) he passes the information to the defined `NotificationStrategy`. For this application only a `ConsoleNotificationStrategy` was implemented, which prints the information to the console.
+
+#### Protobuf Usage
+
+The `Watchdog` uses the `kotlinx-serialization-protobuf` library. This library works similar to the one used in the `Agent` as it allows to use `Annotations` to define a proto contract (see snippet below). A downside of this library is that it only supports the `proto2` spec as of right now. Additionally it is required to set default values for some types. This is because `proto` doesn't serialize default values for scalar types. When for example the `loadPercentage` is `0` it won't be serialized and sent over the wire. However since types in Kotlin can't have default values an explicit value must be defined.
+
+```Kotlin
+@Serializable
+data class Cpu(
+    @ProtoNumber(1) val loadPercentage: Int = 0,
+    @ProtoNumber(2) val powerDraw: Int = 0,
+    @ProtoNumber(3) val coreTemps: List<Int>,
+    @ProtoNumber(10) override val deviceId: String,
+) : SystemValue()
+```
+
+How a `proto` message can be deserialized into an object can be seen below.
+
+```Kotlin
+val cpu = ProtoBuf.decodeFromByteArray<Cpu>(byteArray)
+```
 
 #### Broker Communication
 
@@ -213,3 +269,14 @@ fun startConsume(onValue: (SystemValue) -> Unit) {
 ```
 
 ## Conclusion
+
+RabbitMQ is really great for implementing asynchronous communication.
+It is very easy to set up and also easy to use.
+There are a lot of client libraries for different languages and frameworks which makes its very easy to setup communication between different implementations.
+Since RabbitMQ makes no assumption about the sent data, using a language agnostic format is a noissue.
+In addition to that RabbitMQ provides a comprehensive documentation with source code examples which really speeds up development.
+
+The communication through a topic exchange is very simple. The consumer only needs to define the routing key, in which he can use wildcards.
+However only two wildcards `*` (substitute one word) and `#` (substitute zero or more words) are supported, regex patterns like `device-(1|4)` are not possible. Although this could be mimicked by binding a queue to multiple routing keys. Another issue is that there is no way for the consumers to "discover" the routing keys to which messages have been published. There is also no way for consumers to know the contents of each message since there is no "API contract".
+
+RabbitMQ has a very fine grained API for handling confirmations. Confirmations can be sent for each message or in bulk. It can also be handed off to RabbitMQ (which might not be optimal depending on the use-case). This allows the developer to implement custom confirmation logic depending on the use case.
